@@ -4,13 +4,21 @@
              x:Class="Lottery.Views.StudentV"
              xmlns:ViewModels="clr-namespace:Lottery.ViewModels"
              x:DataType="ViewModels:StudentVM">
-    <HorizontalStackLayout>
-        <Label 
-            Text="{Binding IdNr}"
-            HorizontalOptions="Start" />
-        <Label 
-            Text="{Binding Name}"
-            HorizontalOptions="Center" />
-        <CheckBox IsChecked="{Binding Present}"></CheckBox>
-    </HorizontalStackLayout>
+
+    <Frame Padding="10,8" StyleClass="student-row">
+        <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
+
+                <Label Text="{Binding IdNr}"
+                       StyleClass="student-id"/>
+
+            <Label Grid.Column="1"
+                   Text="{Binding Name}"
+                   StyleClass="student-name"/>
+
+            <CheckBox Grid.Column="2"
+                      IsChecked="{Binding Present}" />
+
+        </Grid>
+    </Frame>
+
 </ContentView>

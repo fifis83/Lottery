@@ -1,57 +1,120 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="Lottery.MainPage"
              xmlns:ViewModels="clr-namespace:Lottery.ViewModels"
              xmlns:Views="clr-namespace:Lottery.Views"
-             x:DataType="ViewModels:MainPageVM">
+             x:DataType="ViewModels:MainPageVM"
+             StyleId="mainPage">
     <ContentPage.BindingContext>
         <ViewModels:MainPageVM/>
     </ContentPage.BindingContext>
 
-    <ScrollView>
-        <VerticalStackLayout>
-            <HorizontalStackLayout Spacing="300">
-                <VerticalStackLayout>
-                    <Label Text="Wybierz klasę:"></Label>
-                    <Picker SelectedIndex="{Binding ClassIndex}" ItemsSource="{Binding PickerClassList}">
-                    </Picker>
-                    <Button Text="+" Command="{Binding AddClassCommand}" IsVisible="{Binding AddClassVisible}"></Button>
-                </VerticalStackLayout>
-                <VerticalStackLayout HorizontalOptions="End">
-                    <Label Text="Szczęśliwy Numerek:"></Label>
-                    <Label Text="{Binding LuckyNr}"></Label>
-                    <Button Text="Losuj" Command="{Binding GenLuckyNrCommand}" ></Button>
-                </VerticalStackLayout>
-                <Button Text="Zapisz" Command="{Binding ExportCommand}"></Button>
-                <Button Text="załaduj" Command="{Binding ImportCommand}"></Button>
-            </HorizontalStackLayout>
+        <ScrollView AbsoluteLayout.LayoutBounds="0,0,1,1"
+                    AbsoluteLayout.LayoutFlags="All">
 
-            <Frame IsVisible="{Binding StudentsVisible}">
-                <VerticalStackLayout>
-                    <Label Text="Co chcesz zrobić?"></Label>
-                    <HorizontalStackLayout>
-                        <Button Text="Dodaj" Command="{Binding AddStudentCommand}"></Button>
-                        <Button Text="Usuń" Command="{Binding RemoveStudentCommand}"></Button>
-                        <Button Text="Edytuj" Command="{Binding EditStudentCommand}"></Button>
-                    </HorizontalStackLayout>
-                    <CollectionView ItemsSource="{Binding CurrentClassStudents}" Margin="20" SelectionMode="Single" SelectedItem="{Binding SelectedStudent}">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical"
-           ItemSpacing="10" ></LinearItemsLayout>
-                        </CollectionView.ItemsLayout>
+            <VerticalStackLayout Padding="10,14" Spacing="10">
+                <Grid RowDefinitions="Auto"
+                  ColumnDefinitions="2*,*,*"
+                  ColumnSpacing="10">
 
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Views:StudentV></Views:StudentV>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-            </Frame>
-            <Label Text="{Binding RandomStudent}"></Label>
-            <Button Command="{Binding DrawStudentCommand}" Text="Losuj szczęśliwca"></Button>
-        </VerticalStackLayout>
-    </ScrollView>
+                    <Frame Grid.Column="0">
+                        <Grid ColumnDefinitions="*,Auto"
+                      RowDefinitions="Auto"
+                      ColumnSpacing="10">
 
+                            <VerticalStackLayout Grid.Column="0" Spacing="6">
+                                <Label Text="Wybierz klasę" StyleClass="heading" />
+                                <Picker SelectedIndex="{Binding ClassIndex}"
+                                ItemsSource="{Binding PickerClassList}" />
+                                <Button Text="+ Dodaj klasę"
+                                StyleClass="add-class"
+                                Command="{Binding AddClassCommand}"
+                                IsVisible="{Binding AddClassVisible}"
+                                HorizontalOptions="Start" />
+                                <Button Text="- Usuń klasę"
+                                StyleClass="remove-class"
+                                Command="{Binding RemoveClassCommand}"
+                                IsVisible="{Binding RemoveClassVisible}"
+                                HorizontalOptions="Start" />
+                            </VerticalStackLayout>
+
+                            <HorizontalStackLayout Grid.Column="1"
+                                          VerticalOptions="End"
+                                          Spacing="8">
+                                <Button Text="⬆ Zapisz"
+                                StyleClass="save"
+                                Command="{Binding ExportCommand}" />
+                                <Button Text="⬇ Załaduj"
+                                StyleClass="load"
+                                Command="{Binding ImportCommand}" />
+                            </HorizontalStackLayout>
+
+                        </Grid>
+                    </Frame>
+
+                    <Frame StyleClass="lucky-frame" Grid.Column="1">
+                        <Grid RowDefinitions="*,Auto">
+                            <Label Grid.Row="0"
+                           Text="{Binding RandomStudent}"
+                           StyleClass="result" />
+                            <Button Grid.Row="1"
+                            Text="Losuj szczęśliwca"
+                            StyleClass="primary"
+                            Command="{Binding DrawStudentCommand}" />
+                        </Grid>
+                    </Frame>
+
+                    <Frame StyleClass="lucky-frame" Grid.Column="2">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Grid.Column="0" >
+                                <Label Text="Szczęśliwy Numerek" StyleClass="heading" />
+                                <Label Text="{Binding LuckyNr}" StyleClass="lucky-number" />
+                            </VerticalStackLayout>
+                            <Button Grid.Column="1"
+                            Text="Losuj"
+                            StyleClass="primary"
+                            Command="{Binding GenLuckyNrCommand}"/>
+                        </Grid>
+                    </Frame>
+                </Grid>
+
+                <Frame IsVisible="{Binding StudentsVisible}">
+                    <VerticalStackLayout Spacing="12">
+
+                        <Label Text="Lista uczniów" StyleClass="heading" />
+
+                        <HorizontalStackLayout Spacing="8" StyleClass="toolbar">
+                            <Button Text="+ Dodaj"
+                                StyleClass="action-add"
+                                Command="{Binding AddStudentCommand}" />
+                            <Button Text="X Usuń"
+                                StyleClass="action-remove"
+                                Command="{Binding RemoveStudentCommand}" />
+                            <Button Text="Edytuj"
+                                StyleClass="secondary"
+                                Command="{Binding EditStudentCommand}" />
+                        </HorizontalStackLayout>
+
+
+                        <CollectionView ItemsSource="{Binding CurrentClassStudents}"
+                                    SelectionMode="Single"
+                                    SelectedItem="{Binding SelectedStudent}">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical"  />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Views:StudentV />
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                    </VerticalStackLayout>
+                </Frame>
+
+
+            </VerticalStackLayout>
+        </ScrollView>
 </ContentPage>

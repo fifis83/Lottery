@@ -1,40 +1,142 @@
-﻿
-button {
-    background-color:red;
-    margin: 20;
+﻿^ContentPage {
+    -maui-shell-title: red;
+    -maui-shell-background:darkblue;
 }
 
-grid {
-    row-gap: 6;
-    column-gap: 6;
+#mainPage {
+    background-color:black;
+    background-image:space.gif;
+    font-family: Times New Roman;
 }
 
-.mainPageTitle {
-    font-style: bold;
+Grid > Label {
+    -maui-vertical-text-alignment: center;
+    vertical-align:center;
+}
+
+TitleBar{
+    background-color: white;
+}
+
+MediaElement{
+    opacity: 0.5;
+}
+
+Label {
+    color: black;
+    font-size: 15;
+}
+
+    .heading{
+        font-size: 18;
+        font-attributes: Bold;
+        letter-spacing: 1;
+    }
+
+
+    .lucky-number{
+        font-size: 42;
+        font-attributes: Bold;
+        color: #8B2E16;
+    }
+
+    .result {
+        font-size: 20;
+        color: #4A4570;
+        font-attributes: Italic;
+        margin: 10, 0;
+    }
+
+Button {
+    background-color: #8B2E16;
+    text-color: #F2E8C6;
     font-size: 14;
+    font-attributes: Bold;
+    border-width: 2;
+    border-color: #3B2A1A;
+    padding: 8, 18;
 }
 
-.mainPageSubtitle {
-    margin-top: 15;
-}
+.primary{
+        background-color: #B8860B;
+    }
 
-.detailPageTitle {
-    font-style: bold;
+.action-add{
+        background-color: #3A5A40;
+    }
+
+.action-remove{
+        background-color: #6B1A0F;
+    }
+
+.secondary{
+        background-color: #4A4570;
+    }
+
+.add-class{
+        background-color: #3A5A40;
+        text-color: #F2E8C6;
+        font-size: 18;
+        font-attributes: Bold;
+        padding: 2, 10;
+        border-color: #2C2C2C;
+        border-width: 2;
+    }
+
+Picker {
+    background-color: #DDD0A3;
+    color:black;
     font-size: 14;
-    text-align: center;
+    margin: 4, 0;
 }
 
-.detailPageSubtitle {
-    text-align: center;
-    font-style: italic;
+Frame {
+    background-color: #EDE3C0;
+    border-color: #3B2A1A;
+    padding: 14;
+    margin: 12, 8;
 }
 
-listview image {
-    height: 60;
-    width: 60;
+.student-row {
+        background-color: #F9F3DC;
+        padding: 8, 12;
+    }
+
+.student-id{
+    font-size: 13;
+    font-attributes: Bold;
+    min-width: 36;
+    horizontal-text-alignment: Start;
 }
 
-stacklayout > image {
-    height: 200;
-    width: 200;
+.student-name{
+    font-size: 15;
+    color: #3B2A1A;
+    horizontal-text-alignment: Center;
+    flex-grow: 1;
 }
+
+CheckBox {
+    color: #8B2E16;
+}
+
+VerticalStackLayout {
+    spacing: 8;
+}
+
+.section{
+        spacing: 6;
+        padding: 10;
+    }
+
+.toolbar{
+    spacing: 12;
+    padding: 10, 16;
+    background-color: #DDD0A3;
+}
+
+divider{
+    color: #B8860B;
+    height-request: 2;
+    margin: 8, 0;
+    opacity: 0.6;

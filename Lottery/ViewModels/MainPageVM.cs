@@ -18,7 +18,6 @@ namespace Lottery.ViewModels
 {
     public partial class MainPageVM : ContentPage
     {
-        //TODO: add saving and loading
 
         public IList<string> PickerClassList { get; set; } = new ObservableCollection<string>() { "Nowa Klasa" };
         private List<ClassM> AllSchoolClasses;
@@ -29,6 +28,7 @@ namespace Lottery.ViewModels
 
         public bool AddClassVisible { get; set; } = false;
         public bool StudentsVisible { get; set; } = false;
+        public bool RemoveClassVisible { get; set; } = false;
 
         private int _luckyNr = 0;
         public string LuckyNr
@@ -48,6 +48,7 @@ namespace Lottery.ViewModels
                 _classIndex = value;
                 StudentsVisible = false;
                 RandomStudent = string.Empty;
+                RemoveClassVisible = false;
 
                 if (value == PickerClassList.Count - 1)
                 {
@@ -60,6 +61,7 @@ namespace Lottery.ViewModels
                     {
                         setClassStudents(AllSchoolClasses[value]);
                         StudentsVisible = true;
+                        RemoveClassVisible = true;
                         if (AllSchoolClasses[value].LastDrawnStudents.Count != 0)
                             RandomStudent = AllSchoolClasses[value].LastDrawnStudents.Last.Value.Name;
                     }
@@ -69,6 +71,7 @@ namespace Lottery.ViewModels
                 OnPropertyChanged(nameof(ClassIndex));
                 OnPropertyChanged(nameof(StudentsVisible));
                 OnPropertyChanged(nameof(RandomStudent));
+                OnPropertyChanged(nameof(RemoveClassVisible));
             }
         }
 
@@ -76,8 +79,6 @@ namespace Lottery.ViewModels
         {
             AllSchoolClasses = new List<ClassM>();
             CurrentClassStudents = new ObservableCollection<StudentVM>();
-
-            //Load("C:\\Users\\filip\\Desktop\\text.txt");
 
             GenLuckyNr();
 
@@ -138,7 +139,7 @@ namespace Lottery.ViewModels
         [RelayCommand]
         private void DrawStudent()
         {
-            if (AllSchoolClasses.Count == 0) return;
+            if (AllSchoolClasses.Count == 0 || ClassIndex == -1 || AddClassVisible) return;
             var students = GetEligibleStudents(AllSchoolClasses[ClassIndex]);
 
             if (!StudentsVisible || students == null || students.Count == 0) { RandomStudent = ""; OnPropertyChanged(nameof(RandomStudent)); return; }
@@ -149,7 +150,7 @@ namespace Lottery.ViewModels
 
             StudentVM student = students[rand.Next(students.Count)];
 
-            // TODO add lucky nr epic save animation
+            // maybe add lucky nr epic save animation
             //if (student.Id == _luckyNr) continue;
 
             RandomStudent = $"{student.Name} Nr. {student.IdNr}";
@@ -158,6 +159,15 @@ namespace Lottery.ViewModels
             OnPropertyChanged(nameof(RandomStudent));
         }
 
+        [RelayCommand]
+        private void RemoveClass()
+        {
+            PickerClassList.Remove(AllSchoolClasses[ClassIndex].Name);
+            AllSchoolClasses.Remove(AllSchoolClasses[ClassIndex]);
+            CurrentClassStudents.Clear();
+            ClassIndex = -1;
+        }
+            
         [RelayCommand]
         private async Task AddClassAsync()
         {
@@ -188,11 +198,13 @@ namespace Lottery.ViewModels
             AddClassVisible = false;
             setClassStudents(AllSchoolClasses.Last());
             StudentsVisible = true;
+            RemoveClassVisible = true;
 
             OnPropertyChanged(nameof(AddClassVisible));
             OnPropertyChanged(nameof(StudentsVisible));
             OnPropertyChanged(nameof(ClassIndex));
             OnPropertyChanged(nameof(PickerClassList));
+            OnPropertyChanged(nameof(RemoveClassVisible));
         }
 
         [RelayCommand]
@@ -257,7 +269,7 @@ namespace Lottery.ViewModels
         public async Task ExportAsync()
         {
             MemoryStream ms = new MemoryStream(Encoding.Default.GetBytes(SerializeToString()));
-            var result = await FileSaver.Default.SaveAsync("Szkola.txt",ms);
+            var result = await FileSaver.Default.SaveAsync("Szkola.txt", ms);
             Debug.WriteLine(result.FilePath);
             if (!result.IsSuccessful)
             {
@@ -317,16 +329,14 @@ namespace Lottery.ViewModels
             try
             {
                 var result = await FilePicker.Default.PickAsync();
-                if (result != null)
+                if (result == null) return;
+                if (result.FileName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (result.FileName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
-                    {
-                        Load(result.FullPath);
-                    }
-                    else
-                    {
-                        await Shell.Current.CurrentPage.DisplayAlert("Błąd", "Wybierz plik .list.xml", "OK");
-                    }
+                    Load(result.FullPath);
+                }
+                else
+                {
+                    await Shell.Current.CurrentPage.DisplayAlert("Błąd", "Wybierz plik .txt", "OK");
                 }
             }
             catch (Exception ex)
@@ -343,90 +353,78 @@ namespace Lottery.ViewModels
             List<ClassM> classes = new List<ClassM>();
             ClassM? newClass = null;
             StudentM? newStudent = null;
-            try
+            string[] contents = File.ReadAllLines(filePath);
+
+            for (int i = 0; i < contents.Length; i++)
             {
-                string[] contents = File.ReadAllLines(filePath);
-
-                for (int i = 0; i < contents.Length; i++)
+                string line = contents[i];
+                Debug.WriteLine(line);
+                if (newClass == null)
                 {
-                    string line = contents[i];
-                    Debug.WriteLine(line);
-                    if (newClass == null)
-                    {
-                        Debug.WriteLine("creating new class");
-                        newClass = new ClassM(line);
-                        i++;
-                    }
-
-                    else if (line == "{")
-                    {
-                        Debug.WriteLine("starting student read");
-                        readingStudent = true;
-                    }
-
-                    else if (readingStudent)
-                    {
-                        if (line != "}")
-                        {
-                            Debug.WriteLine("reading student");
-                            string[] splitLine = contents[i].Split(';');
-                            newStudent = new StudentM() { Id = int.Parse(splitLine[0]), Name = splitLine[1], Present = bool.Parse(splitLine[2]) };
-                        }
-                        else
-                        {
-                            Debug.WriteLine("stopping reading student");
-                            newClass.Students.Add(new StudentVM(newStudent));
-                            newStudent = null;
-                            readingStudent = false;
-                        }
-                    }
-                    else if (line == "[")
-                    {
-                        Debug.WriteLine("starting reading last drawn");
-                        readingLastDrawn = true;
-                    }
-                    else if (readingLastDrawn)
-                    {
-                        if (line != "]")
-                        {
-                            Debug.WriteLine("reading last drawn");
-                            int idNr = int.Parse(line);
-                            StudentVM student = newClass.Students.Find(s => s.IdNr == idNr);
-                            newClass.LastDrawnStudents.AddLast(student);
-                        }
-                        else
-                        {
-                            Debug.WriteLine("stopping reading last drawn");
-                            readingLastDrawn = false;
-                        }
-                    }
-                    else if (line == "}" && !readingStudent)
-                    {
-                        Debug.WriteLine("stopping reading class");
-                        classes.Add(newClass);
-                        newClass = null;
-                    }
-                    else
-                    {
-                        Debug.WriteLine("nun to do");
-                    }
+                    Debug.WriteLine("creating new class");
+                    newClass = new ClassM(line);
+                    i++;
                 }
-                AllSchoolClasses = classes;
-                PickerClassList.Clear();
-                _classIndex = 0;
-                foreach (var sc in AllSchoolClasses)
+
+                else if (line == "{")
                 {
-                    PickerClassList.Add(sc.Name);
+                    Debug.WriteLine("starting student read");
+                    readingStudent = true;
                 }
-                PickerClassList.Add("Nowa Klasa");
-                RefreshDisplay();
+
+                else if (readingStudent && line != "}")
+                {
+                    Debug.WriteLine("reading student");
+                    string[] splitLine = contents[i].Split(';');
+                    newStudent = new StudentM() { Id = int.Parse(splitLine[0]), Name = splitLine[1], Present = bool.Parse(splitLine[2]) };
+                }
+                else if (readingStudent && line == "}")
+                {
+                    Debug.WriteLine("stopping reading student");
+                    newClass.Students.Add(new StudentVM(newStudent));
+                    newStudent = null;
+                    readingStudent = false;
+                }
+                else if (line == "[")
+                {
+                    Debug.WriteLine("starting reading last drawn");
+                    readingLastDrawn = true;
+                }
+                if (readingLastDrawn && line != "]")
+                {
+                    Debug.WriteLine("reading last drawn");
+                    int idNr = int.Parse(line);
+                    StudentVM student = newClass.Students.Find(s => s.IdNr == idNr);
+                    newClass.LastDrawnStudents.AddLast(student);
+                }
+                else if (readingLastDrawn && line == "]")
+                {
+                    Debug.WriteLine("stopping reading last drawn");
+                    readingLastDrawn = false;
+                }
+                else if (line == "}" && !readingStudent)
+                {
+                    Debug.WriteLine("stopping reading class");
+                    classes.Add(newClass);
+                    newClass = null;
+                }
+                else
+                {
+                    Debug.WriteLine("Something went wrong reading file");
+                }
             }
-            catch (Exception e)
+
+            AllSchoolClasses = classes;
+            PickerClassList.Clear();
+            _classIndex = 0;
+
+            foreach (var sc in AllSchoolClasses)
             {
-                Debug.WriteLine("sum went rong");
-                Debug.WriteLine(e.ToString());
-                App.Current.MainPage.DisplayAlert("Błąd", "Wystąpił błąd podczas wczytywania pliku", "OK");
+                PickerClassList.Add(sc.Name);
             }
+
+            PickerClassList.Add("Nowa Klasa");
+            RefreshDisplay();
         }
 
         private void RefreshDisplay()

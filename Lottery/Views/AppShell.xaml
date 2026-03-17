@@ -8,7 +8,7 @@
     Title="Lottery">
 
     <ShellContent
-        Title="Home"
+        Title="STUDENTS BEWARE!!!"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
 
