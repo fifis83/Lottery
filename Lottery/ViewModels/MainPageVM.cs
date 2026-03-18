@@ -1,18 +1,9 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Storage;
+﻿using CommunityToolkit.Maui.Storage;
 using CommunityToolkit.Mvvm.Input;
 using Lottery.Models;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using System.Xml.Serialization;
 
 namespace Lottery.ViewModels
 {
@@ -63,7 +54,7 @@ namespace Lottery.ViewModels
                         StudentsVisible = true;
                         RemoveClassVisible = true;
                         if (AllSchoolClasses[value].LastDrawnStudents.Count != 0)
-                            RandomStudent = AllSchoolClasses[value].LastDrawnStudents.Last.Value.Name;
+                            RandomStudent = "Nr. "+AllSchoolClasses[value].LastDrawnStudents.Last.Value.IdNr + " "+AllSchoolClasses[value].LastDrawnStudents.Last.Value.Name;
                     }
                 }
 
@@ -142,7 +133,7 @@ namespace Lottery.ViewModels
             if (AllSchoolClasses.Count == 0 || ClassIndex == -1 || AddClassVisible) return;
             var students = GetEligibleStudents(AllSchoolClasses[ClassIndex]);
 
-            if (!StudentsVisible || students == null || students.Count == 0) { RandomStudent = ""; OnPropertyChanged(nameof(RandomStudent)); return; }
+            if (!StudentsVisible || students == null || students.Count == 0) { RandomStudent = "Brak dostępnych uczniów"; OnPropertyChanged(nameof(RandomStudent)); return; }
             ;
 
             Random rand = new Random();
@@ -183,6 +174,7 @@ namespace Lottery.ViewModels
             }
 
             // Check if class already exists
+            // could be method with this name
             string className = PickerClassList.FirstOrDefault(s => s.ToLower().Trim() == result.Trim().ToLower(), "Nowa Klasa");
 
             if (className != "Nowa Klasa")
@@ -372,35 +364,41 @@ namespace Lottery.ViewModels
                     readingStudent = true;
                 }
 
-                else if (readingStudent && line != "}")
+                else if (readingStudent)
                 {
-                    Debug.WriteLine("reading student");
-                    string[] splitLine = contents[i].Split(';');
-                    newStudent = new StudentM() { Id = int.Parse(splitLine[0]), Name = splitLine[1], Present = bool.Parse(splitLine[2]) };
-                }
-                else if (readingStudent && line == "}")
-                {
-                    Debug.WriteLine("stopping reading student");
-                    newClass.Students.Add(new StudentVM(newStudent));
-                    newStudent = null;
-                    readingStudent = false;
+                    if (line != "}")
+                    {
+                        Debug.WriteLine("reading student");
+                        string[] splitLine = contents[i].Split(';');
+                        newStudent = new StudentM() { Id = int.Parse(splitLine[0]), Name = splitLine[1], Present = bool.Parse(splitLine[2]) };
+                    }
+                    else
+                    {
+                        Debug.WriteLine("stopping reading student");
+                        newClass.Students.Add(new StudentVM(newStudent));
+                        newStudent = null;
+                        readingStudent = false;
+                    }
                 }
                 else if (line == "[")
                 {
                     Debug.WriteLine("starting reading last drawn");
                     readingLastDrawn = true;
                 }
-                if (readingLastDrawn && line != "]")
+                else if (readingLastDrawn)
                 {
-                    Debug.WriteLine("reading last drawn");
-                    int idNr = int.Parse(line);
-                    StudentVM student = newClass.Students.Find(s => s.IdNr == idNr);
-                    newClass.LastDrawnStudents.AddLast(student);
-                }
-                else if (readingLastDrawn && line == "]")
-                {
-                    Debug.WriteLine("stopping reading last drawn");
-                    readingLastDrawn = false;
+                    if (line != "]")
+                    {
+                        Debug.WriteLine("reading last drawn");
+                        int idNr = int.Parse(line);
+                        StudentVM student = newClass.Students.Find(s => s.IdNr == idNr);
+                        newClass.LastDrawnStudents.AddLast(student);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("stopping reading last drawn");
+                        readingLastDrawn = false;
+                    }
                 }
                 else if (line == "}" && !readingStudent)
                 {
@@ -410,7 +408,7 @@ namespace Lottery.ViewModels
                 }
                 else
                 {
-                    Debug.WriteLine("Something went wrong reading file");
+                    Debug.WriteLine("nun to do");
                 }
             }
 
