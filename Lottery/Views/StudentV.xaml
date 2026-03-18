@@ -4,14 +4,19 @@
              x:Class="Lottery.Views.StudentV"
              xmlns:ViewModels="clr-namespace:Lottery.ViewModels"
              x:DataType="ViewModels:StudentVM">
-
+    <ContentView.Resources>
+        <StyleSheet Source="/Resources/Styles/style.css" />
+    </ContentView.Resources>
     <Frame Padding="10,8" StyleClass="student-row">
         <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
 
-                <Label Text="{Binding IdNr}"
-                       StyleClass="student-id"/>
+            <Label Grid.Column="0" StyleClass="student-name" Text="{Binding IdNr}"
+                 />
+            <Label Grid.Column="0" StyleClass="student-name" Text="{Binding IdNr}"
+                 />
 
             <Label Grid.Column="1"
+                   TextColor="Black"
                    Text="{Binding Name}"
                    StyleClass="student-name"/>
 

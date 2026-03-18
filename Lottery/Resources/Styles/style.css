@@ -14,9 +14,6 @@ Grid > Label {
     vertical-align:center;
 }
 
-TitleBar{
-    background-color: white;
-}
 
 MediaElement{
     opacity: 0.5;
@@ -102,16 +99,11 @@ Frame {
         padding: 8, 12;
     }
 
-.student-id{
-    font-size: 13;
-    font-attributes: Bold;
-    min-width: 36;
-    horizontal-text-alignment: Start;
-}
+    
 
 .student-name{
+    color:black;
     font-size: 15;
-    color: #3B2A1A;
     horizontal-text-alignment: Center;
     flex-grow: 1;
 }
@@ -135,8 +127,3 @@ VerticalStackLayout {
     background-color: #DDD0A3;
 }
 
-divider{
-    color: #B8860B;
-    height-request: 2;
-    margin: 8, 0;
-    opacity: 0.6;
